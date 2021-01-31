@@ -17,8 +17,8 @@
         android:name="com.example.contactsapp.ui.DetailsFragment"
         android:label="DetailsFragment" />
     <fragment
-        android:id="@+id/favoriteFragment"
-        android:name="com.example.contactsapp.ui.FavoriteFragment"
+        android:id="@+id/favoriteContactsFragment"
+        android:name="com.example.contactsapp.ui.FavoriteContactsFragment"
         android:label="FavoriteFragment">
         <action
             android:id="@+id/action_favoriteFragment_to_detailsFragment"
