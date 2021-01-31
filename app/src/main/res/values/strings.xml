@@ -4,4 +4,6 @@
     <string name="contacts">contacts</string>
     <string name="contactsApp">Contacts App</string>
     <string name="login_text">Enjoy the application and make your communications easier</string>
+    <string name="contacts_menu">Contacts</string>
+    <string name="favorites">Favorites</string>
 </resources>
