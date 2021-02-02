@@ -6,4 +6,5 @@
     <string name="login_text">Enjoy the application and make your communications easier</string>
     <string name="contacts_menu">Contacts</string>
     <string name="favorites">Favorites</string>
+    <string name="contact_permission_rationale">Need contacts read permission for fetching and displaying contacts</string>
 </resources>

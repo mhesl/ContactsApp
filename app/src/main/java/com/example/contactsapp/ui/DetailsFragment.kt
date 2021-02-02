@@ -1,5 +1,7 @@
 package com.example.contactsapp.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,10 +30,12 @@ class DetailsFragment : BaseFragment() {
     private lateinit var contact: Contact
     private lateinit var number: String
 
-    private lateinit var detail_image: ImageView
-    private lateinit var detail_name: TextView
-    private lateinit var detail_number: TextView
+    private lateinit var detailImage: ImageView
+    private lateinit var detailName: TextView
+    private lateinit var detailNumber: TextView
     private lateinit var likeIcon: ImageView
+    private lateinit var phoneIcon: ImageView
+
     var photo_condition = false
 
     override fun onCreateView(
@@ -42,10 +46,11 @@ class DetailsFragment : BaseFragment() {
         _binding = ContactDetailFragmentBinding.inflate(inflater, container, false)
         val view = binding.root
         number = requireArguments().getString("number").toString()
-        detail_image = view.findViewById(R.id.detail_fragment_image)
-        detail_name = view.findViewById(R.id.detail_fragment_name)
-        detail_number = view.findViewById(R.id.detail_fragment_number)
+        detailImage = view.findViewById(R.id.detail_fragment_image)
+        detailName = view.findViewById(R.id.detail_fragment_name)
+        detailNumber = view.findViewById(R.id.detail_fragment_number)
         likeIcon = view.findViewById(R.id.like_detail)
+        phoneIcon = view.findViewById(R.id.phone_call)
 
         likeIcon.setOnClickListener {
             if (!photo_condition) {
@@ -68,6 +73,8 @@ class DetailsFragment : BaseFragment() {
         }
 
 
+
+
         return view
     }
 
@@ -75,6 +82,13 @@ class DetailsFragment : BaseFragment() {
         viewModel.contactsLiveData.observe(viewLifecycleOwner, Observer {
             contact = it
             makeUI(contact)
+
+            phoneIcon.setOnClickListener {
+                val makeCall = Intent(Intent.ACTION_CALL)
+                makeCall.data = Uri.parse("tel:" + contact.number)
+                startActivity(makeCall)
+            }
+
         })
         viewModel.fetchContacts(number)
     }
@@ -86,18 +100,19 @@ class DetailsFragment : BaseFragment() {
     }
 
     private fun makeUI(contact: Contact) {
-        detail_name.text = contact.name
-        detail_number.text = contact.number
+        detailName.text = contact.name
+        detailNumber.text = contact.number
         Glide.with(requireActivity())
             .load(contact.photo)
             .apply(RequestOptions.circleCropTransform())
             .fallback(android.R.drawable.sym_def_app_icon)
-            .into(detail_image)
+            .into(detailImage)
         if (contact.isLiked)
             likeIcon.setBackgroundResource(R.drawable.ic_heart)
         else
             likeIcon.setBackgroundResource(R.drawable.ic_like)
-    }
 
+
+    }
 
 }

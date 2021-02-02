@@ -65,7 +65,7 @@ class ContactsAdapter(data: List<Contact>, context: Context, parentFragment: Con
             .apply(RequestOptions.circleCropTransform())
             .fallback(android.R.drawable.sym_def_app_icon)
             .into(viewHolder.imgContact!!)
-        viewHolder.txtName!!.setOnClickListener {
+        convertViewEx.setOnClickListener {
             NavHostFragment.findNavController(mParentFragment)
                 .navigate(
                     R.id.action_contactsFragment_to_detailsFragment, bundleOf(

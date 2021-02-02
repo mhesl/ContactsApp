@@ -1,9 +1,10 @@
 package com.example.contactsapp.ui
 
+import android.content.Intent
 import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -135,7 +136,11 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
                 while (!data.isClosed && data.moveToNext()) {
                     val contactId: Long = data.getLong(0)
                     val name: String = data.getString(1)
-                    val photo: String = data.getString(2)!!
+                    var photo: String? = null
+                    photo = if (data.getString(2) != null) {
+                        data.getString(2)!!
+                    } else
+                        ""
                     val contactPhones = phones[contactId]
                     if (contactPhones != null) {
                         for (phone in contactPhones) {
