@@ -3,11 +3,11 @@ package com.example.contactsapp.ui
 import android.database.Cursor
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
-import android.widget.ProgressBar
+import android.widget.*
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.loader.app.LoaderManager
@@ -19,6 +19,7 @@ import com.example.contactsapp.adapter.ContactsAdapter
 import com.example.contactsapp.databinding.ContactsFragmentBinding
 import com.example.contactsapp.database.Contact
 import com.example.contactsapp.viewmodels.ContactsViewModel
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
 
@@ -27,13 +28,17 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
     private val binding get() = _binding!!
 
     private lateinit var viewModel: ContactsViewModel
+    private lateinit var searchView: SearchView
+    private lateinit var adapter: ContactsAdapter
+    private lateinit var filterButton: FloatingActionButton
 
     private var listView: ListView? = null
     private var spinner: ProgressBar? = null
     private var phones: HashMap<Long, ArrayList<String>> = HashMap()
     private var contacts: ArrayList<Contact> = ArrayList()
+    private var contactsNames: ArrayList<String> = ArrayList()
     private var dataBaseContacts: List<Contact> = ArrayList()
-
+    private var filterFlag = true
 
     private var PROJECTION_NUMBERS: Array<String> = arrayOf(
         ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
@@ -55,9 +60,26 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
         val view = binding.root
         listView = view.findViewById(R.id.list)
         spinner = view.findViewById(R.id.spinner)
+        searchView = view.findViewById(R.id.search_view)
+        filterButton = view.findViewById(R.id.filter_button)
 
+        filterButton.setOnClickListener {
+            if (filterFlag) {
+                viewModel.likedContactsLiveData.observe(viewLifecycleOwner, Observer {
+                    adapter = ContactsAdapter(it, requireContext(), this)
+                    listView!!.adapter = adapter
+                    listView!!.deferNotifyDataSetChanged()
+                })
+                viewModel.fetchLikedContacts()
+                filterFlag = false
+            } else {
+                loadAdapter()
+                filterFlag = true
+            }
+        }
         return view
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,7 +157,8 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
         launch {
             saveContact(contact!!)
         }
-        contacts.add(contact!!)
+        contactsNames.add(contact!!.name)
+        contacts.add(contact)
     }
 
     private fun loadAdapter() {
@@ -145,10 +168,11 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
             }
         }
         viewModel.contactsLiveData.observe(viewLifecycleOwner, Observer {
-            listView!!.adapter = ContactsAdapter(it, requireContext(), this)
+            adapter = ContactsAdapter(it, requireContext(), this)
+            listView!!.adapter = adapter
+            listView!!.deferNotifyDataSetChanged()
         })
         viewModel.fetchAllContacts()
-
         spinner!!.visibility = View.GONE
     }
 
