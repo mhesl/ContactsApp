@@ -6,9 +6,5 @@
         android:icon="@drawable/ic_contact_book"
         android:title="@string/contacts_menu" />
 
-    <item
-        android:id="@+id/favoriteContactsFragment"
-        android:icon="@drawable/ic_star"
-        android:title="@string/favorites" />
 
 </menu>
