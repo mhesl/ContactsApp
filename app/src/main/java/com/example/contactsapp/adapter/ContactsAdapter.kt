@@ -60,11 +60,13 @@ class ContactsAdapter(data: List<Contact>, context: Context, parentFragment: Con
 
         viewHolder.txtName!!.text = contact.name
         viewHolder.imgContact!!.tag = position
-        Glide.with(mContext!!)
-            .load(contact.photo)
-            .apply(RequestOptions.circleCropTransform())
-            .fallback(android.R.drawable.sym_def_app_icon)
-            .into(viewHolder.imgContact!!)
+        if (contact.photo != "") {
+            Glide.with(mContext!!)
+                .load(contact.photo)
+                .apply(RequestOptions.circleCropTransform())
+                .fallback(android.R.drawable.sym_def_app_icon)
+                .into(viewHolder.imgContact!!)
+        }
         convertViewEx.setOnClickListener {
             NavHostFragment.findNavController(mParentFragment)
                 .navigate(

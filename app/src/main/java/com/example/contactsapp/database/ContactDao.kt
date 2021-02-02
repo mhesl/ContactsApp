@@ -12,7 +12,7 @@ interface ContactDao {
     suspend fun getAllContacts(): List<Contact>
 
     @Insert
-    suspend fun addMultipleContacts(vararg contact: Contact)
+    suspend fun addMultipleContacts(vararg contacts: Contact)
 
     @Update
     suspend fun updateContact(contact: Contact)

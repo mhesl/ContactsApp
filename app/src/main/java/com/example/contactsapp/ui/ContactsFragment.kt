@@ -1,19 +1,20 @@
 package com.example.contactsapp.ui
 
-import android.content.Intent
 import android.database.Cursor
-import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
+import androidx.navigation.fragment.NavHostFragment
+import com.chivorn.smartmaterialspinner.SmartMaterialSpinner
 import com.example.contactsapp.R
 import com.example.contactsapp.database.ContactDataBase
 import com.example.contactsapp.adapter.ContactsAdapter
@@ -29,7 +30,6 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
     private val binding get() = _binding!!
 
     private lateinit var viewModel: ContactsViewModel
-    private lateinit var searchView: SearchView
     private lateinit var adapter: ContactsAdapter
     private lateinit var filterButton: FloatingActionButton
 
@@ -38,8 +38,9 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
     private var phones: HashMap<Long, ArrayList<String>> = HashMap()
     private var contacts: ArrayList<Contact> = ArrayList()
     private var contactsNames: ArrayList<String> = ArrayList()
-    private var dataBaseContacts: List<Contact> = ArrayList()
     private var filterFlag = true
+    private var spSearchable: SmartMaterialSpinner<String?>? = null
+
 
     private var PROJECTION_NUMBERS: Array<String> = arrayOf(
         ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
@@ -61,8 +62,8 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
         val view = binding.root
         listView = view.findViewById(R.id.list)
         spinner = view.findViewById(R.id.spinner)
-        searchView = view.findViewById(R.id.search_view)
         filterButton = view.findViewById(R.id.filter_button)
+        spSearchable = view.findViewById(R.id.sp_searchable)
 
         filterButton.setOnClickListener {
             if (filterFlag) {
@@ -74,6 +75,7 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
                 viewModel.fetchLikedContacts()
                 filterFlag = false
             } else {
+
                 loadAdapter()
                 filterFlag = true
             }
@@ -149,9 +151,26 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
                     }
                 }
                 data.close()
-                loadAdapter()
+                pushToDataBase()
+
             }
         }
+    }
+
+    private fun pushToDataBase() {
+        launch {
+            pushContacts()
+            loadAdapter()
+        }
+
+    }
+
+    private suspend fun pushContacts() {
+        context?.let {
+            for (contact in contacts)
+                saveContact(contact)
+        }
+
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
@@ -159,19 +178,12 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     private fun addContact(contact: Contact?) {
-        launch {
-            saveContact(contact!!)
-        }
         contactsNames.add(contact!!.name)
         contacts.add(contact)
     }
 
     private fun loadAdapter() {
-        launch {
-            context.let {
-                dataBaseContacts = ContactDataBase(it!!).getContactDao().getAllContacts()
-            }
-        }
+
         viewModel.contactsLiveData.observe(viewLifecycleOwner, Observer {
             adapter = ContactsAdapter(it, requireContext(), this)
             listView!!.adapter = adapter
@@ -179,6 +191,7 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
         })
         viewModel.fetchAllContacts()
         spinner!!.visibility = View.GONE
+        initSearchSpinner()
     }
 
     private suspend fun saveContact(contact: Contact) {
@@ -190,6 +203,44 @@ class ContactsFragment : BaseFragment(), LoaderManager.LoaderCallbacks<Cursor> {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this).get(ContactsViewModel::class.java)
+    }
+
+    private fun initSearchSpinner() {
+        val contactName = ArrayList<String>()
+        contacts.forEach { contactName.add(it.name) }
+
+        if (contactName.isEmpty())
+            contactName.add("there is no contact")
+
+        @Suppress("USELESS_CAST")
+        spSearchable!!.item = contactName as List<String?>?
+
+        setOnItemSelectedListener(spSearchable!!)
+    }
+
+    private fun setOnItemSelectedListener(vararg spinners: SmartMaterialSpinner<*>) {
+        for (spinner in spinners) {
+            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    adapterView: AdapterView<*>,
+                    view: View,
+                    position: Int,
+                    id: Long
+                ) {
+                    NavHostFragment.findNavController(this@ContactsFragment)
+                        .navigate(
+                            R.id.action_contactsFragment_to_detailsFragment, bundleOf(
+                                "number" to contacts[position].number
+                            )
+                        )
+
+                }
+
+                override fun onNothingSelected(adapterView: AdapterView<*>) {
+
+                }
+            }
+        }
     }
 
 

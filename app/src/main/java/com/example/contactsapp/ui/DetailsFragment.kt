@@ -102,11 +102,13 @@ class DetailsFragment : BaseFragment() {
     private fun makeUI(contact: Contact) {
         detailName.text = contact.name
         detailNumber.text = contact.number
-        Glide.with(requireActivity())
-            .load(contact.photo)
-            .apply(RequestOptions.circleCropTransform())
-            .fallback(android.R.drawable.sym_def_app_icon)
-            .into(detailImage)
+        if (contact.photo != "") {
+            Glide.with(requireActivity())
+                .load(contact.photo)
+                .apply(RequestOptions.circleCropTransform())
+                .fallback(android.R.drawable.sym_def_app_icon)
+                .into(detailImage)
+        }
         if (contact.isLiked)
             likeIcon.setBackgroundResource(R.drawable.ic_heart)
         else
