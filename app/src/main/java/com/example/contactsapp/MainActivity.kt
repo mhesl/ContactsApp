@@ -24,17 +24,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
         setSupportActionBar(binding.toolbar)
 
-        // asking for permissions
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_CONTACTS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CONTACTS), 1)
-        }
-
-
-
         navController = Navigation.findNavController(this, R.id.nav_host_fragment)
         binding.bottomNav.setupWithNavController(navController)
         NavigationUI.setupActionBarWithNavController(this, navController)
@@ -44,15 +33,5 @@ class MainActivity : AppCompatActivity() {
         return NavigationUI.navigateUp(navController, null)
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String?>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (!(requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-            Toast.makeText(this, "Permission required to read contacts", Toast.LENGTH_LONG).show()
-        }
-    }
 
 }
