@@ -2,4 +2,4 @@ package com.example.contactsapp.ui
 
 import androidx.fragment.app.Fragment
 
-class FavoriteFragment : Fragment()
+class FavoriteContactsFragment : Fragment()
